@@ -2,7 +2,13 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Finance">
+<meta name="theme-color" content="#f0e8fc">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e8d8f8'/><text y='.9em' font-size='72' x='50%' text-anchor='middle'>✦</text></svg>">
+<link rel="manifest" id="pwaManifest">
 <title>Finanční přehled</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -393,6 +399,9 @@ canvas{width:100%!important;border-radius:11px;}
   border-radius:14px;border:1.5px dashed rgba(200,180,240,.42);background:rgba(255,255,255,.28);
   font-family:'Nunito',sans-serif;font-size:.78rem;color:var(--textSoft);cursor:pointer;transition:all .18s;}
 .add-goal-btn:hover{background:rgba(255,255,255,.52);color:var(--text);}
+.goal-tip{font-size:.75rem;color:var(--textMid);background:rgba(255,255,255,.4);
+  border-radius:10px;padding:.45rem .65rem;margin-top:.45rem;line-height:1.45;
+  border-left:3px solid var(--lavender);}
 
 /* ── INVEST ── */
 .invest-section{display:flex;flex-direction:column;gap:.72rem;}
@@ -531,6 +540,117 @@ canvas{width:100%!important;border-radius:11px;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .saving-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;opacity:0;transition:opacity .3s;}
 .saving-dot.show{opacity:1;animation:pulse 1.2s infinite;}
+/* ═══════════════════════════════════════════════
+   MOBILNÍ LAYOUT (max-width: 768px)
+   ═══════════════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* Tělo */
+  html,body{height:100%;overflow:hidden;}
+  #appShell{height:100dvh;height:100vh;}
+
+  /* Top bar — kompaktnější, jen název + měsíc */
+  .topbar{
+    padding:.5rem .75rem;
+    flex-wrap:nowrap;
+    gap:.4rem;
+  }
+  .topbar-title{font-size:.95rem;}
+  .tab-row{display:none;} /* schovat tab row — nahradíme bottom nav */
+  .user-bar{gap:.35rem;}
+  #userName{display:none;} /* skrýt jméno na mobilu */
+  .signout-btn{font-size:.65rem;padding:.18rem .5rem;}
+  #userAvatar{width:22px;height:22px;}
+
+  /* Sidebar — schovat na mobilu */
+  .sidebar{display:none;}
+
+  /* Hlavní obsah přes celou šířku */
+  .main{flex-direction:column;}
+  .content{padding:.6rem .5rem 5rem;} /* padding-bottom pro bottom nav */
+
+  /* Kalendář — menší buňky ale stále přehledné */
+  .cal-grid-header,.cal-grid{gap:2px;}
+  .cal-day{min-height:58px;padding:.22rem .25rem;border-radius:8px;}
+  .day-num{font-size:.68rem;}
+  .entry-pill{font-size:.52rem;}
+  .day-balance{font-size:.5rem;bottom:.15rem;right:.2rem;}
+
+  /* Day panel — přes celou obrazovku */
+  .day-panel{
+    width:100%;
+    border-left:none;
+    border-top:1.5px solid var(--glassBorder);
+    border-radius:20px 20px 0 0;
+    top:auto;bottom:0;height:90dvh;height:90vh;
+    transform:translateY(100%);
+  }
+  .day-panel.open{transform:translateY(0);}
+
+  /* Stat cards — 2 sloupce */
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .stat-card .val{font-size:1.1rem;}
+
+  /* Health grid — 3 sloupce ale menší */
+  .health-grid{gap:.45rem;}
+  .health-item .h-val{font-size:1.1rem;}
+
+  /* Charts — na mobilu pod sebou */
+  .charts-row{grid-template-columns:1fr;}
+
+  /* Invest summary — na mobilu pod sebou */
+  .inv-summary{grid-template-columns:1fr 1fr;}
+
+  /* Budget rows — menší font */
+  .budget-row{font-size:.72rem;}
+  .budget-row.header{font-size:.62rem;}
+  .bud-input{width:75px;font-size:.72rem;}
+
+  /* Goals */
+  .goal-inputs{gap:.35rem;}
+  .goal-inputs input{width:85px;}
+
+  /* Two col → single col */
+  .two-col{grid-template-columns:1fr;}
+
+  /* Login karta */
+  .login-card{padding:2rem 1.6rem;}
+  .login-card h1{font-size:1.65rem;}
+}
+
+/* ── BOTTOM NAV (jen mobil) ── */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:var(--glass);backdrop-filter:blur(20px);
+  border-top:1.5px solid var(--glassBorder);
+  padding:.4rem .2rem;
+  padding-bottom:calc(.4rem + env(safe-area-inset-bottom));
+}
+.bottom-nav-inner{display:flex;justify-content:space-around;align-items:center;}
+.bn-btn{
+  display:flex;flex-direction:column;align-items:center;gap:.12rem;
+  background:none;border:none;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.6rem;font-weight:600;
+  color:var(--textSoft);padding:.3rem .5rem;border-radius:12px;
+  transition:all .18s;min-width:52px;
+}
+.bn-btn .bn-icon{font-size:1.3rem;line-height:1;}
+.bn-btn.active{color:var(--textMid);}
+.bn-btn.active .bn-icon{
+  background:linear-gradient(135deg,var(--lavender),var(--sky));
+  border-radius:10px;padding:.2rem .5rem;
+}
+.bn-btn.red{color:var(--danger);}
+
+@media(max-width:768px){
+  .bottom-nav{display:block;}
+}
+
+/* Safe area pro iPhone notch */
+@supports(padding-top: env(safe-area-inset-top)){
+  .topbar{padding-top:calc(.5rem + env(safe-area-inset-top));}
+}
 </style>
 </head>
 <body>
@@ -595,6 +715,30 @@ canvas{width:100%!important;border-radius:11px;}
     <span id="userName"></span>
     <span class="saving-dot" id="savingDot"></span>
     <button class="signout-btn" onclick="signOutUser()">Odhlásit</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobil) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bn-btn active" id="bn-calendar" onclick="switchTabMobile('calendar',this)">
+      <div class="bn-icon">📅</div>Kalendář
+    </button>
+    <button class="bn-btn" id="bn-stats" onclick="switchTabMobile('stats',this)">
+      <div class="bn-icon">📊</div>Přehled
+    </button>
+    <button class="bn-btn" id="bn-budget" onclick="switchTabMobile('budget',this)">
+      <div class="bn-icon">📋</div>Rozpočet
+    </button>
+    <button class="bn-btn" id="bn-goals" onclick="switchTabMobile('goals',this)">
+      <div class="bn-icon">🎯</div>Cíle
+    </button>
+    <button class="bn-btn" id="bn-invest" onclick="switchTabMobile('invest',this)">
+      <div class="bn-icon">📈</div>Investice
+    </button>
+    <button class="bn-btn red" onclick="openBulkDel()">
+      <div class="bn-icon">🗑</div>Čistit
+    </button>
   </div>
 </div>
 
@@ -762,6 +906,51 @@ canvas{width:100%!important;border-radius:11px;}
   </div>
 </div>
 
+<!-- ONBOARDING MODAL -->
+<div class="modal-bg" id="onboardingBg">
+  <div class="modal" onclick="event.stopPropagation()" style="width:420px;max-width:95vw">
+    <div style="text-align:center;margin-bottom:1.1rem">
+      <div style="font-size:2rem;margin-bottom:.4rem">✦</div>
+      <h3 style="font-size:1.2rem;margin-bottom:.3rem">Vítej v Finančním přehledu!</h3>
+      <p style="font-size:.82rem;color:var(--textSoft)">Než začneš, krátké vysvětlení dvou důležitých fondů.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.2rem">
+      <div style="background:rgba(168,216,245,.2);border:1.5px solid rgba(168,216,245,.5);border-radius:14px;padding:.85rem 1rem">
+        <div style="font-weight:700;margin-bottom:.3rem">💎 Rezerva — nouzový fond</div>
+        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+          Peníze na které <strong>nesaháš</strong> — jen v opravdové nouzi (ztráta práce, nemoc, velká nečekaná oprava).
+          Ideálně <strong>3–6 měsíčních výdajů</strong>. Dokud nemáš rezervu, investice počkají.
+        </div>
+      </div>
+      <div style="background:rgba(249,184,200,.2);border:1.5px solid rgba(249,184,200,.5);border-radius:14px;padding:.85rem 1rem">
+        <div style="font-weight:700;margin-bottom:.3rem">🌸 Peace of Mind — fond klidu</div>
+        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+          Menší fond na <strong>nečekané výdaje</strong> na které se nesahá do rezervy — rozbité auto, oprava doma, nečekaná faktura.
+          Ideálně <strong>1 měsíční výdaj</strong>. Když z něj sáhneš, doplníš ho zpátky.
+        </div>
+      </div>
+      <div style="background:rgba(157,232,196,.2);border:1.5px solid rgba(157,232,196,.5);border-radius:14px;padding:.85rem 1rem">
+        <div style="font-weight:700;margin-bottom:.3rem">📈 A co investice?</div>
+        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+          Investovat můžeš i souběžně — ale ideální pořadí je: nejdřív POM → pak Rezerva → pak investice naplno.
+          I malá pravidelná částka má smysl. 🌱
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:.5rem">
+      <label>Jaké jsou tvoje měsíční výdaje? (odhadem)</label>
+      <input type="number" id="onboardExpense" placeholder="např. 15000" style="font-size:.95rem">
+    </div>
+    <div id="onboardSuggestion" style="font-size:.78rem;color:var(--textSoft);margin-bottom:.9rem;min-height:1.2rem"></div>
+
+    <button class="btn-primary" onclick="finishOnboarding()" style="width:100%;padding:.55rem">
+      Rozumím, jdeme na to! ✦
+    </button>
+  </div>
+</div>
+
 <!-- GOAL MODAL -->
 <div class="modal-bg" id="goalModalBg" onclick="closeGoalModalBg(event)">
   <div class="modal" onclick="event.stopPropagation()">
@@ -838,8 +1027,8 @@ let currentDate=new Date();
 let db={
   entries:[],
   goals:[
-    {id:"rezerva",name:"💎 Rezerva",target:240000,actual:201000,color:"#a8d8f5"},
-    {id:"pom",name:"🌸 Peace of Mind",target:40000,actual:13000,color:"#f9b8c8"},
+    {id:"rezerva",name:"💎 Rezerva",target:0,actual:0,color:"#a8d8f5"},
+    {id:"pom",name:"🌸 Peace of Mind",target:0,actual:0,color:"#f9b8c8"},
   ],
   cats:[],          // all user categories — populated from DEFAULT_CATS on first load
   portfolio:{snapshots:[]},
@@ -1210,8 +1399,22 @@ function deleteRecurAllFuture(){
 function renderGoalsTab(){
   const sec=document.getElementById('goalsSection');
   sec.innerHTML=db.goals.map(g=>{
-    const pct=Math.min(100,Math.round(g.actual/g.target*100));
+    const pct=Math.min(100,Math.round(g.actual/Math.max(g.target,1)*100));
     const remaining=g.target-g.actual;
+
+    // Contextual tip per built-in goal
+    let tip='';
+    if(g.id==='rezerva'){
+      if(g.target===0) tip=`<div class="goal-tip">💡 Nastav si cíl — doporučeno 3–6× tvé měsíční výdaje. Tento fond nesaháš, jen v opravdové nouzi.</div>`;
+      else if(pct<50) tip=`<div class="goal-tip">💡 Teprve začínáš — prioritizuj doplňování rezervy před investicemi.</div>`;
+      else if(pct<100) tip=`<div class="goal-tip">🌱 Dobrý postup! Až dosáhneš cíle, můžeš naplno investovat.</div>`;
+      else tip=`<div class="goal-tip">🎉 Rezerva je plná — teď investuj naplno!</div>`;
+    }
+    if(g.id==='pom'){
+      if(g.target===0) tip=`<div class="goal-tip">💡 Nastav si cíl — ideálně 1× tvé měsíční výdaje. Tento fond je na nečekané výdaje, když z něj sáhneš, doplníš ho zpátky.</div>`;
+      else if(pct<100) tip=`<div class="goal-tip">💡 POM je tvůj první záchranný síť — doplň ho dřív než rezervu.</div>`;
+      else tip=`<div class="goal-tip">✓ POM je plný — výborně! Teď buduj rezervu.</div>`;
+    }
     let deadlineStr='';
     if(g.deadline){
       const dl=parseLocalDate(g.deadline);
@@ -1234,6 +1437,7 @@ function renderGoalsTab(){
         <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:linear-gradient(90deg,${g.color},${g.color}aa)"></div></div>
       </div>
       <div style="font-size:.73rem;color:var(--textSoft);margin-top:.22rem">${remaining>0?`Zbývá ${fmt(remaining)}`:'🎉 Cíl splněn!'}</div>
+      ${tip}
       <div class="goal-inputs">
         <label>Přidat:</label><input type="number" id="gadd_${g.id}" placeholder="0 Kč">
         <button class="save-goal-btn" onclick="addToGoal('${g.id}')">+ Přidat</button>
@@ -1620,6 +1824,7 @@ function loadData(savedData){
       db.portfolio=s.portfolio||{snapshots:[]};
       db.recurringTemplates=s.recurringTemplates||[];
       db.budgets=s.budgets||{};
+      db.onboardingDone=s.onboardingDone||false;
     }else{
       db.cats=[...DEFAULT_CATS];
     }
@@ -1633,7 +1838,71 @@ document.addEventListener('change',e=>{
   if(e.target.id==='bulkDelDate')updateBulkDelPreview();
 });
 
-// ══ INIT ════════════════════════════════════════════════
+// ══ ONBOARDING ════════════════════════════════════════════
+function checkOnboarding(){
+  // Show onboarding if it's a brand new user (no entries, goals at zero)
+  const isNew = db.entries.length===0 &&
+    db.goals.every(g=>g.actual===0&&g.target===0);
+  if(isNew && !db.onboardingDone){
+    document.getElementById('onboardingBg').classList.add('open');
+    // Live suggestion as user types monthly expenses
+    document.getElementById('onboardExpense').addEventListener('input', function(){
+      const v=parseInt(this.value)||0;
+      if(!v){document.getElementById('onboardSuggestion').textContent='';return;}
+      const pom=v;
+      const rez3=v*3;
+      const rez6=v*6;
+      document.getElementById('onboardSuggestion').innerHTML=
+        `💡 Doporučené cíle: POM <strong>${fmt(pom)}</strong> · Rezerva <strong>${fmt(rez3)}–${fmt(rez6)}</strong>`;
+    });
+  }
+}
+function finishOnboarding(){
+  const expense=parseInt(document.getElementById('onboardExpense').value)||0;
+  if(expense>0){
+    const rezerva=db.goals.find(g=>g.id==='rezerva');
+    const pom=db.goals.find(g=>g.id==='pom');
+    if(rezerva){rezerva.target=expense*6;}
+    if(pom){pom.target=expense;}
+  }
+  db.onboardingDone=true;
+  document.getElementById('onboardingBg').classList.remove('open');
+  persist();
+  if(activeTab==='goals')renderGoalsTab();
+  renderSbGoals();
+  toast('✓ Vítej! Cíle jsou připraveny.');
+}
+function switchTabMobile(tab, btn){
+  // sync with desktop tab buttons
+  const desktopBtn = document.querySelector(`.tab-btn:nth-child(${['calendar','stats','budget','goals','invest'].indexOf(tab)+1})`);
+  switchTab(tab, desktopBtn || btn);
+  // update bottom nav active state
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
+  const bnBtn = document.getElementById('bn-'+tab);
+  if(bnBtn) bnBtn.classList.add('active');
+}
+
+// ── PWA Manifest (inline) ─────────────────────────────────
+(function injectManifest(){
+  const manifest = {
+    name: "Finanční přehled",
+    short_name: "Finance",
+    description: "Osobní finanční tracker",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#f0e8fc",
+    theme_color: "#f0e8fc",
+    orientation: "portrait",
+    icons: [{
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e0d0f8'/><text y='.85em' font-size='68' x='50%' text-anchor='middle'>✦</text></svg>",
+      sizes: "192x192", type: "image/svg+xml"
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const el = document.getElementById('pwaManifest');
+  if(el) el.href = url;
+})();
 // Načte Chart.js, pak čeká na Firebase auth callback
 (function init(){
   const s=document.createElement('script');
@@ -1643,6 +1912,7 @@ document.addEventListener('change',e=>{
     window._appReady=()=>{
       loadData(window._firestoreData);
       render();
+      checkOnboarding();
     };
   };
   document.head.appendChild(s);
