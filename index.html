@@ -567,19 +567,20 @@ canvas{width:100%!important;border-radius:11px;}
   background:rgba(255,255,255,.4);transition:all .18s;position:relative;}
 .user-profile-btn:hover{background:rgba(255,255,255,.65);}
 .profile-menu{
-  display:none;position:absolute;top:calc(100% + .5rem);right:0;
-  background:linear-gradient(135deg,rgba(252,242,255,.97),rgba(242,248,255,.97));
-  border:1.5px solid var(--glassBorder);border-radius:14px;
-  box-shadow:0 8px 32px rgba(140,100,200,.18);
-  min-width:180px;overflow:hidden;z-index:200;
+  display:none;position:fixed;top:auto;right:1rem;
+  background:white;
+  border:1.5px solid rgba(200,180,240,.5);border-radius:14px;
+  box-shadow:0 8px 32px rgba(140,100,200,.25);
+  min-width:190px;overflow:hidden;z-index:500;
   animation:modalIn .15s cubic-bezier(.34,1.56,.64,1);
 }
 .profile-menu.open{display:block;}
 .pm-item{padding:.65rem 1rem;font-size:.85rem;cursor:pointer;
-  font-family:'Nunito',sans-serif;color:var(--text);transition:background .14s;}
-.pm-item:hover{background:rgba(200,180,240,.18);}
+  font-family:'Nunito',sans-serif;color:var(--text);transition:background .14s;
+  background:white;}
+.pm-item:hover{background:rgba(200,180,240,.15);}
 .pm-danger{color:var(--danger);}
-.pm-danger:hover{background:rgba(240,128,152,.15);}
+.pm-danger:hover{background:rgba(240,128,152,.12);}
 .pm-divider{height:1px;background:rgba(200,180,240,.25);margin:.2rem 0;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .saving-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;opacity:0;transition:opacity .3s;}
@@ -961,46 +962,93 @@ canvas{width:100%!important;border-radius:11px;}
 
 <!-- ONBOARDING MODAL -->
 <div class="modal-bg" id="onboardingBg">
-  <div class="modal" onclick="event.stopPropagation()" style="width:420px;max-width:95vw">
-    <div style="text-align:center;margin-bottom:1.1rem">
-      <div style="font-size:2rem;margin-bottom:.4rem">✦</div>
-      <h3 style="font-size:1.2rem;margin-bottom:.3rem">Vítej v Finančním přehledu!</h3>
-      <p style="font-size:.82rem;color:var(--textSoft)">Než začneš, krátké vysvětlení dvou důležitých fondů.</p>
-    </div>
+  <div class="modal" onclick="event.stopPropagation()" style="width:440px;max-width:95vw">
 
-    <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.2rem">
-      <div style="background:rgba(168,216,245,.2);border:1.5px solid rgba(168,216,245,.5);border-radius:14px;padding:.85rem 1rem">
-        <div style="font-weight:700;margin-bottom:.3rem">💎 Rezerva — nouzový fond</div>
-        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
-          Peníze na které <strong>nesaháš</strong> — jen v opravdové nouzi (ztráta práce, nemoc, velká nečekaná oprava).
-          Ideálně <strong>3–6 měsíčních výdajů</strong>. Dokud nemáš rezervu, investice počkají.
+    <!-- KROK 1: Vysvětlení fondů -->
+    <div id="ob-step1">
+      <div style="text-align:center;margin-bottom:1.1rem">
+        <div style="font-size:2rem;margin-bottom:.35rem">✦</div>
+        <h3 style="font-size:1.15rem;margin-bottom:.25rem">Vítej v Finančním přehledu!</h3>
+        <p style="font-size:.82rem;color:var(--textSoft)">Dva fondy, které jsou základem zdravých financí.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem">
+        <div style="background:rgba(249,184,200,.2);border:1.5px solid rgba(249,184,200,.5);border-radius:14px;padding:.85rem 1rem">
+          <div style="font-weight:700;margin-bottom:.28rem">🌸 Peace of Mind</div>
+          <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+            Fond na <strong>nečekané menší výdaje</strong> — rozbije se pračka, poliješ klávesnici, přijde nečekaná faktura.
+            Když z něj sáhneš, prostě ho doplníš zpátky. Ideálně <strong>1× tvé měsíční výdaje</strong>.
+          </div>
+        </div>
+        <div style="background:rgba(168,216,245,.2);border:1.5px solid rgba(168,216,245,.5);border-radius:14px;padding:.85rem 1rem">
+          <div style="font-weight:700;margin-bottom:.28rem">💎 Rezerva</div>
+          <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+            Fond na <strong>skutečnou nouzi</strong> — ztráta práce, vážná nemoc, velká oprava.
+            Na tenhle <strong>nesaháš</strong>, jen když opravdu není jiná cesta. Ideálně <strong>3–6× měsíční výdaje</strong>.
+          </div>
+        </div>
+        <div style="background:rgba(157,232,196,.2);border:1.5px solid rgba(157,232,196,.5);border-radius:14px;padding:.85rem 1rem">
+          <div style="font-weight:700;margin-bottom:.28rem">📈 Investice</div>
+          <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
+            Investovat můžeš i souběžně — i malá pravidelná částka má smysl. Ale čím dřív máš oba fondy, tím klidněji investuješ. 🌱
+          </div>
         </div>
       </div>
-      <div style="background:rgba(249,184,200,.2);border:1.5px solid rgba(249,184,200,.5);border-radius:14px;padding:.85rem 1rem">
-        <div style="font-weight:700;margin-bottom:.3rem">🌸 Peace of Mind — fond klidu</div>
-        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
-          Menší fond na <strong>nečekané výdaje</strong> na které se nesahá do rezervy — rozbité auto, oprava doma, nečekaná faktura.
-          Ideálně <strong>1 měsíční výdaj</strong>. Když z něj sáhneš, doplníš ho zpátky.
+      <button class="btn-primary" onclick="obGoStep(2)" style="width:100%;padding:.52rem">Rozumím, nastavím si fondy →</button>
+    </div>
+
+    <!-- KROK 2: Nastavení fondů -->
+    <div id="ob-step2" style="display:none">
+      <h3 style="margin-bottom:.25rem">Nastav si fondy</h3>
+      <p style="font-size:.8rem;color:var(--textSoft);margin-bottom:1rem">Kdykoli si to můžeš upravit v záložce Cíle.</p>
+
+      <!-- POM -->
+      <div style="background:rgba(249,184,200,.15);border:1.5px solid rgba(249,184,200,.45);border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:.55rem">🌸 Peace of Mind</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <div class="form-row" style="margin:0">
+            <label>Mám teď naspoř.</label>
+            <input type="number" id="obPomActual" placeholder="0 Kč" oninput="obUpdateSuggestion()">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label>Cíl (kolik chci mít)</label>
+            <input type="number" id="obPomTarget" placeholder="např. 15 000 Kč">
+          </div>
         </div>
       </div>
-      <div style="background:rgba(157,232,196,.2);border:1.5px solid rgba(157,232,196,.5);border-radius:14px;padding:.85rem 1rem">
-        <div style="font-weight:700;margin-bottom:.3rem">📈 A co investice?</div>
-        <div style="font-size:.8rem;color:var(--textSoft);line-height:1.5">
-          Investovat můžeš i souběžně — ale ideální pořadí je: nejdřív POM → pak Rezerva → pak investice naplno.
-          I malá pravidelná částka má smysl. 🌱
+
+      <!-- Rezerva -->
+      <div style="background:rgba(168,216,245,.15);border:1.5px solid rgba(168,216,245,.45);border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:.55rem">💎 Rezerva</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <div class="form-row" style="margin:0">
+            <label>Mám teď naspoř.</label>
+            <input type="number" id="obRezActual" placeholder="0 Kč" oninput="obUpdateSuggestion()">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label>Cíl (kolik chci mít)</label>
+            <input type="number" id="obRezTarget" placeholder="např. 90 000 Kč">
+          </div>
         </div>
+      </div>
+
+      <!-- Tip na základě měsíčních výdajů -->
+      <div style="margin-bottom:.55rem">
+        <div style="font-size:.75rem;color:var(--textSoft);margin-bottom:.3rem">💡 Nevíš kolik? Zadej měsíční výdaje a dopočítám ti to:</div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="number" id="obExpense" placeholder="Měsíční výdaje (Kč)"
+            style="flex:1;padding:.32rem .6rem;border-radius:10px;border:1.5px solid rgba(200,180,240,.4);background:rgba(255,255,255,.6);font-family:'Nunito',sans-serif;font-size:.84rem;color:var(--text);outline:none"
+            oninput="obSuggestFromExpense()">
+          <button onclick="obApplySuggestion()" style="padding:.32rem .8rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--lavender),var(--sky));color:white;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap">Doplnit cíle</button>
+        </div>
+        <div id="obSuggestion" style="font-size:.76rem;color:var(--textSoft);margin-top:.3rem;min-height:1rem"></div>
+      </div>
+
+      <div style="display:flex;gap:.5rem">
+        <button class="btn-cancel" onclick="obGoStep(1)">← Zpět</button>
+        <button class="btn-primary" onclick="finishOnboarding()">Uložit a začít ✦</button>
       </div>
     </div>
 
-    <div class="form-row" style="margin-bottom:.5rem">
-      <label>Jaké jsou tvoje měsíční výdaje? (odhadem)</label>
-      <input type="number" id="onboardExpense" placeholder="např. 15000" style="font-size:.95rem">
-    </div>
-    <div id="onboardSuggestion" style="font-size:.78rem;color:var(--textSoft);margin-bottom:.9rem;min-height:1.2rem"></div>
-
-    <button class="btn-primary" onclick="finishOnboarding()" style="width:100%;padding:.55rem">
-      Rozumím, jdeme na to! ✦
-    </button>
   </div>
 </div>
 
@@ -1514,7 +1562,7 @@ function renderGoalsTab(){
     }
     if(g.id==='pom'){
       if(g.target===0) tip=`<div class="goal-tip">💡 Nastav si cíl — ideálně 1× tvé měsíční výdaje. Tento fond je na nečekané výdaje, když z něj sáhneš, doplníš ho zpátky.</div>`;
-      else if(pct<100) tip=`<div class="goal-tip">💡 POM je tvůj první záchranný síť — doplň ho dřív než rezervu.</div>`;
+      else if(pct<100) tip=`<div class="goal-tip">💡 Tento fond je tvoje první záchrana — na rozbité spotřebiče, nečekané opravy nebo faktury. Doplň ho dřív než rezervu.</div>`;
       else tip=`<div class="goal-tip">✓ POM je plný — výborně! Teď buduj rezervu.</div>`;
     }
     let deadlineStr='';
@@ -1942,7 +1990,12 @@ document.addEventListener('change',e=>{
 
 // ══ PROFILE MENU ══════════════════════════════════════════
 function toggleProfileMenu(){
-  document.getElementById('profileMenu').classList.toggle('open');
+  const menu=document.getElementById('profileMenu');
+  const btn=document.getElementById('userProfileBtn');
+  const rect=btn.getBoundingClientRect();
+  menu.style.top=(rect.bottom+6)+'px';
+  menu.style.right=(window.innerWidth-rect.right)+'px';
+  menu.classList.toggle('open');
 }
 // Close menu when clicking outside
 document.addEventListener('click', e=>{
@@ -2038,37 +2091,43 @@ async function confirmDeleteAccount(){
   }
 }
 function checkOnboarding(){
-  // Show onboarding if it's a brand new user (no entries, goals at zero)
-  const isNew = db.entries.length===0 &&
-    db.goals.every(g=>g.actual===0&&g.target===0);
-  if(isNew && !db.onboardingDone){
+  const isNew=db.entries.length===0&&db.goals.every(g=>g.actual===0&&g.target===0);
+  if(isNew&&!db.onboardingDone){
+    obGoStep(1);
     document.getElementById('onboardingBg').classList.add('open');
-    // Live suggestion as user types monthly expenses
-    document.getElementById('onboardExpense').addEventListener('input', function(){
-      const v=parseInt(this.value)||0;
-      if(!v){document.getElementById('onboardSuggestion').textContent='';return;}
-      const pom=v;
-      const rez3=v*3;
-      const rez6=v*6;
-      document.getElementById('onboardSuggestion').innerHTML=
-        `💡 Doporučené cíle: POM <strong>${fmt(pom)}</strong> · Rezerva <strong>${fmt(rez3)}–${fmt(rez6)}</strong>`;
-    });
   }
 }
+function obGoStep(n){
+  document.getElementById('ob-step1').style.display=n===1?'':'none';
+  document.getElementById('ob-step2').style.display=n===2?'':'none';
+}
+function obSuggestFromExpense(){
+  const v=parseInt(document.getElementById('obExpense').value)||0;
+  if(!v){document.getElementById('obSuggestion').textContent='';return;}
+  document.getElementById('obSuggestion').innerHTML=
+    `POM: <strong>${fmt(v)}</strong> · Rezerva: <strong>${fmt(v*3)}–${fmt(v*6)}</strong>`;
+}
+function obApplySuggestion(){
+  const v=parseInt(document.getElementById('obExpense').value)||0;
+  if(!v)return;
+  document.getElementById('obPomTarget').value=v;
+  document.getElementById('obRezTarget').value=v*6;
+}
 function finishOnboarding(){
-  const expense=parseInt(document.getElementById('onboardExpense').value)||0;
-  if(expense>0){
-    const rezerva=db.goals.find(g=>g.id==='rezerva');
-    const pom=db.goals.find(g=>g.id==='pom');
-    if(rezerva){rezerva.target=expense*6;}
-    if(pom){pom.target=expense;}
-  }
+  const pomActual=parseInt(document.getElementById('obPomActual').value)||0;
+  const pomTarget=parseInt(document.getElementById('obPomTarget').value)||0;
+  const rezActual=parseInt(document.getElementById('obRezActual').value)||0;
+  const rezTarget=parseInt(document.getElementById('obRezTarget').value)||0;
+  const rezerva=db.goals.find(g=>g.id==='rezerva');
+  const pom=db.goals.find(g=>g.id==='pom');
+  if(rezerva){rezerva.actual=rezActual;if(rezTarget)rezerva.target=rezTarget;}
+  if(pom){pom.actual=pomActual;if(pomTarget)pom.target=pomTarget;}
   db.onboardingDone=true;
   document.getElementById('onboardingBg').classList.remove('open');
   persist();
   if(activeTab==='goals')renderGoalsTab();
   renderSbGoals();
-  toast('✓ Vítej! Cíle jsou připraveny.');
+  toast('✓ Vítej! Fondy jsou nastavené.');
 }
 function switchTabMobile(tab, btn){
   // sync with desktop tab buttons
