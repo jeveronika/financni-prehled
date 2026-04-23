@@ -20,9 +20,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut,
          createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
-         sendPasswordResetEmail }
+         sendPasswordResetEmail, updatePassword, deleteUser, EmailAuthProvider,
+         reauthenticateWithCredential }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc }
+import { getFirestore, doc, getDoc, setDoc, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ↓↓↓ SEM VLOŽ SVŮJ CONFIG (nahraď celý tento objekt) ↓↓↓
@@ -114,6 +115,28 @@ window.toggleAuthMode = () => {
 };
 window.signOutUser = async () => {
   await signOut(auth);
+};
+
+window.firebaseUpdateProfile = async (name) => {
+  const user = auth.currentUser;
+  if(user && name) await updateProfile(user, {displayName: name});
+};
+window.firebaseUpdatePassword = async (newPass) => {
+  const user = auth.currentUser;
+  if(user) await updatePassword(user, newPass);
+};
+window.firebaseDeleteAccount = async () => {
+  const user = auth.currentUser;
+  if(!user) return;
+  // Delete Firestore data first
+  await deleteDoc(doc(db_f, 'users', user.uid));
+  // Then delete auth account
+  await deleteUser(user);
+};
+window.getAuthProvider = () => {
+  const user = auth.currentUser;
+  if(!user) return null;
+  return user.providerData[0]?.providerId || null;
 };
 
 // ── Sleduj stav přihlášení ────────────────────────────────
@@ -537,6 +560,27 @@ canvas{width:100%!important;border-radius:11px;}
 .signout-btn{padding:.2rem .6rem;border-radius:20px;border:1.5px solid rgba(200,180,240,.38);
   background:transparent;font-family:'Nunito',sans-serif;font-size:.7rem;color:var(--textSoft);cursor:pointer;transition:all .15s;}
 .signout-btn:hover{background:rgba(240,128,152,.15);color:var(--danger);}
+
+/* ── USER PROFILE DROPDOWN ── */
+.user-profile-btn{display:flex;align-items:center;gap:.4rem;cursor:pointer;
+  padding:.25rem .55rem;border-radius:20px;border:1.5px solid rgba(200,180,240,.35);
+  background:rgba(255,255,255,.4);transition:all .18s;position:relative;}
+.user-profile-btn:hover{background:rgba(255,255,255,.65);}
+.profile-menu{
+  display:none;position:absolute;top:calc(100% + .5rem);right:0;
+  background:linear-gradient(135deg,rgba(252,242,255,.97),rgba(242,248,255,.97));
+  border:1.5px solid var(--glassBorder);border-radius:14px;
+  box-shadow:0 8px 32px rgba(140,100,200,.18);
+  min-width:180px;overflow:hidden;z-index:200;
+  animation:modalIn .15s cubic-bezier(.34,1.56,.64,1);
+}
+.profile-menu.open{display:block;}
+.pm-item{padding:.65rem 1rem;font-size:.85rem;cursor:pointer;
+  font-family:'Nunito',sans-serif;color:var(--text);transition:background .14s;}
+.pm-item:hover{background:rgba(200,180,240,.18);}
+.pm-danger{color:var(--danger);}
+.pm-danger:hover{background:rgba(240,128,152,.15);}
+.pm-divider{height:1px;background:rgba(200,180,240,.25);margin:.2rem 0;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .saving-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;opacity:0;transition:opacity .3s;}
 .saving-dot.show{opacity:1;animation:pulse 1.2s infinite;}
@@ -711,10 +755,19 @@ canvas{width:100%!important;border-radius:11px;}
     <button class="tab-btn" style="border-color:rgba(240,128,152,.4);color:var(--danger)" onclick="openBulkDel()" title="Vyčistit data">🗑</button>
   </div>
   <div class="user-bar">
-    <img id="userAvatar" src="" alt="">
-    <span id="userName"></span>
+    <div class="user-profile-btn" onclick="toggleProfileMenu()" id="userProfileBtn">
+      <img id="userAvatar" src="" alt="">
+      <span id="userName"></span>
+      <span style="font-size:.65rem;color:var(--textSoft)">▾</span>
+    </div>
     <span class="saving-dot" id="savingDot"></span>
-    <button class="signout-btn" onclick="signOutUser()">Odhlásit</button>
+    <!-- Dropdown menu -->
+    <div class="profile-menu" id="profileMenu">
+      <div class="pm-item" onclick="openEditProfile()">👤 Upravit profil</div>
+      <div class="pm-divider"></div>
+      <div class="pm-item" onclick="signOutUser()">🚪 Odhlásit</div>
+      <div class="pm-item pm-danger" onclick="openDeleteAccount()">🗑 Smazat účet</div>
+    </div>
   </div>
 </div>
 
@@ -948,6 +1001,55 @@ canvas{width:100%!important;border-radius:11px;}
     <button class="btn-primary" onclick="finishOnboarding()" style="width:100%;padding:.55rem">
       Rozumím, jdeme na to! ✦
     </button>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-bg" id="editProfileBg" onclick="closeEditProfile(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>👤 Upravit profil</h3>
+    <div class="form-row">
+      <label>Zobrazené jméno</label>
+      <input type="text" id="epName" placeholder="Tvoje jméno">
+    </div>
+    <div style="font-size:.72rem;color:var(--textSoft);margin:-.2rem 0 .7rem">Změna hesla</div>
+    <div class="form-row">
+      <label>Nové heslo (nechat prázdné = beze změny)</label>
+      <input type="password" id="epPass" placeholder="Nové heslo (min. 6 znaků)">
+    </div>
+    <div class="form-row">
+      <label>Zopakovat nové heslo</label>
+      <input type="password" id="epPass2" placeholder="Zopakovat heslo">
+    </div>
+    <div id="epError" style="display:none;font-size:.78rem;color:var(--danger);
+      background:rgba(240,128,152,.12);padding:.4rem .7rem;border-radius:9px;margin-bottom:.5rem"></div>
+    <div id="epSuccess" style="display:none;font-size:.78rem;color:#30a870;
+      background:rgba(157,232,196,.18);padding:.4rem .7rem;border-radius:9px;margin-bottom:.5rem"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeEditProfile()">Zrušit</button>
+      <button class="btn-primary" onclick="saveProfile()">Uložit změny</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT MODAL -->
+<div class="modal-bg" id="deleteAccountBg" onclick="closeDeleteAccount(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>🗑 Smazat účet</h3>
+    <p style="font-size:.84rem;color:var(--textSoft);margin-bottom:1rem;line-height:1.5">
+      Tato akce je <strong>nevratná</strong>. Smaže se tvůj účet i všechna tvoje data z databáze.
+    </p>
+    <div class="form-row">
+      <label>Pro potvrzení napiš: <strong>SMAZAT</strong></label>
+      <input type="text" id="deleteConfirm" placeholder="SMAZAT">
+    </div>
+    <div id="daError" style="display:none;font-size:.78rem;color:var(--danger);
+      background:rgba(240,128,152,.12);padding:.4rem .7rem;border-radius:9px;margin-bottom:.5rem"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeDeleteAccount()">Zrušit</button>
+      <button class="btn-primary" style="background:linear-gradient(135deg,#f09898,#d06060)"
+        onclick="confirmDeleteAccount()">Smazat navždy</button>
+    </div>
   </div>
 </div>
 
@@ -1832,13 +1934,109 @@ function loadData(savedData){
 }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeDayPanel();closeGoalModal();closeRecurDel();closeBulkDel();}
+  if(e.key==='Escape'){closeDayPanel();closeGoalModal();closeRecurDel();closeBulkDel();closeEditProfile();closeDeleteAccount();}
 });
 document.addEventListener('change',e=>{
   if(e.target.id==='bulkDelDate')updateBulkDelPreview();
 });
 
-// ══ ONBOARDING ════════════════════════════════════════════
+// ══ PROFILE MENU ══════════════════════════════════════════
+function toggleProfileMenu(){
+  document.getElementById('profileMenu').classList.toggle('open');
+}
+// Close menu when clicking outside
+document.addEventListener('click', e=>{
+  const btn=document.getElementById('userProfileBtn');
+  const menu=document.getElementById('profileMenu');
+  if(menu&&btn&&!btn.contains(e.target)&&!menu.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
+
+// ══ EDIT PROFILE ══════════════════════════════════════════
+function openEditProfile(){
+  document.getElementById('profileMenu').classList.remove('open');
+  document.getElementById('epName').value = document.getElementById('userName').textContent || '';
+  document.getElementById('epPass').value = '';
+  document.getElementById('epPass2').value = '';
+  document.getElementById('epError').style.display = 'none';
+  document.getElementById('epSuccess').style.display = 'none';
+
+  // Hide password fields for Google users
+  const provider = window.getAuthProvider?.();
+  const isGoogle = provider === 'google.com';
+  const passSection = document.getElementById('epPass').closest('.form-row');
+  const pass2Section = document.getElementById('epPass2').closest('.form-row');
+  if(passSection) passSection.style.display = isGoogle ? 'none' : '';
+  if(pass2Section) pass2Section.style.display = isGoogle ? 'none' : '';
+
+  document.getElementById('editProfileBg').classList.add('open');
+  setTimeout(()=>document.getElementById('epName').focus(), 60);
+}
+function closeEditProfile(e){
+  if(!e||e.target===document.getElementById('editProfileBg'))
+    document.getElementById('editProfileBg').classList.remove('open');
+}
+async function saveProfile(){
+  const name = document.getElementById('epName').value.trim();
+  const pass = document.getElementById('epPass').value;
+  const pass2 = document.getElementById('epPass2').value;
+  const errEl = document.getElementById('epError');
+  const okEl = document.getElementById('epSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+
+  if(pass && pass !== pass2){
+    errEl.textContent='Hesla se neshodují.'; errEl.style.display='block'; return;
+  }
+  if(pass && pass.length < 6){
+    errEl.textContent='Heslo musí mít alespoň 6 znaků.'; errEl.style.display='block'; return;
+  }
+  try{
+    if(name) await window.firebaseUpdateProfile(name);
+    if(pass) await window.firebaseUpdatePassword(pass);
+    document.getElementById('userName').textContent = name;
+    okEl.textContent='✓ Profil byl uložen.'; okEl.style.display='block';
+    setTimeout(()=>document.getElementById('editProfileBg').classList.remove('open'), 1500);
+  }catch(e){
+    if(e.code==='auth/requires-recent-login'){
+      errEl.textContent='Z bezpečnostních důvodů se prosím odhlás a znovu přihlaš, pak zkus znovu.';
+    }else{
+      errEl.textContent='Chyba: '+e.message;
+    }
+    errEl.style.display='block';
+  }
+}
+
+// ══ DELETE ACCOUNT ════════════════════════════════════════
+function openDeleteAccount(){
+  document.getElementById('profileMenu').classList.remove('open');
+  document.getElementById('deleteConfirm').value='';
+  document.getElementById('daError').style.display='none';
+  document.getElementById('deleteAccountBg').classList.add('open');
+  setTimeout(()=>document.getElementById('deleteConfirm').focus(), 60);
+}
+function closeDeleteAccount(e){
+  if(!e||e.target===document.getElementById('deleteAccountBg'))
+    document.getElementById('deleteAccountBg').classList.remove('open');
+}
+async function confirmDeleteAccount(){
+  const val = document.getElementById('deleteConfirm').value.trim();
+  const errEl = document.getElementById('daError');
+  if(val !== 'SMAZAT'){
+    errEl.textContent='Napiš přesně SMAZAT pro potvrzení.'; errEl.style.display='block'; return;
+  }
+  try{
+    await window.firebaseDeleteAccount();
+    // Auth state change will redirect to login automatically
+  }catch(e){
+    if(e.code==='auth/requires-recent-login'){
+      errEl.textContent='Z bezpečnostních důvodů se prosím odhlás a znovu přihlaš, pak zkus znovu.';
+    }else{
+      errEl.textContent='Chyba: '+e.message;
+    }
+    errEl.style.display='block';
+  }
+}
 function checkOnboarding(){
   // Show onboarding if it's a brand new user (no entries, goals at zero)
   const isNew = db.entries.length===0 &&
